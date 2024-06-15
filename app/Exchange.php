@@ -24,24 +24,25 @@ class Exchange
     private array $crypto;
     private string $baseDir;
     private array $wallet;
-    private User $user;
+
     private CryptoApi $exchangeApi;
     private Database $database;
     private TransactionDatabase $transactionDatabase;
     private UserDatabase $userDatabase;
+    private \App\User $user;
 
 
-    public function __construct(string $baseDir, User $user,Database $database,UserDatabase $userDatabase,TransactionDatabase $transactionDatabase)
+    public function __construct(string $baseDir,User $user,Database $database,UserDatabase $userDatabase,TransactionDatabase $transactionDatabase)
     {
         $this->database = $database;
         $this->crypto = $this->getCryptoList();
         $this->baseDir = $baseDir;
-        $this->user = $user;
         $this->latestUpdate= $this->exchangeApi->getLatest();
         $this->wallet=$this->getWallet();
 
         $this->transactionDatabase = $transactionDatabase;
         $this->userDatabase = $userDatabase;
+        $this->user = $user;
     }
 
 
@@ -106,10 +107,10 @@ class Exchange
             $name = $cryptoToSell->getName();
             $valueNow = $cryptoToSell->getValueNow();
             $amount = $cryptoToSell->getAmount();
-            $symbol= $cryptoToSell->getSymbol();
+            $symbol = $cryptoToSell->getSymbol();
+            $newWallet = $this->user->getWallet() + $valueNow;
 
-            $this->user->setWallet($this->user->getWallet() + $valueNow);
-
+            $this->userDatabase->updateWallet($this->user->getName(), $newWallet);
 
             $this->database->deleteWallet($id);
 
@@ -139,11 +140,13 @@ class Exchange
         $dateOfPurchase = Carbon::now('Europe/Riga');
         $value = $amount * $price;
         $valueNow = $amount * $price;
-        $this->user->setWallet($this->user->getWallet() - $purchasePrice);
+        $newWallet = $this->user->getWallet() - $purchasePrice;
+
+        $this->userDatabase->updateWallet($this->user->getName(), $newWallet);
 
         $crypto = new Wallet($name, $symbol, $amount, $price, $purchasePrice, $dateOfPurchase, $value, $valueNow);
         $this->addToWallet($crypto);
-        $this->user->saveToFile();
+
 
         $transaction = new Transaction(
             $this->user->getName(),

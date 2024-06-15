@@ -56,6 +56,14 @@ class UserDatabase
             $stmt->executeQuery();
 
     }
+    public function updateWallet(string $name, float $newWallet): void
+    {
+        $query = "UPDATE usersData SET wallet = :wallet WHERE name = :name";
+        $stmt = $this->dbalConnection->prepare($query);
+        $stmt->bindValue(':wallet', $newWallet);
+        $stmt->bindValue(':name', $name);
+        $stmt->executeQuery();
+    }
 
     public function getAllUsers(): array
     {
