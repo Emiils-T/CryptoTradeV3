@@ -27,7 +27,6 @@ class TransactionDatabase
             'path' => $this->filePath,
         );
         $this->dbalConnection = DriverManager::getConnection($this->connectionParams);
-        /*$this->transaction = $this->getAll();*/
     }
 
     public function create():void
@@ -51,8 +50,6 @@ class TransactionDatabase
         foreach ($sqls as $sql) {
             $dbalConnection->executeStatement($sql);
         }
-
-        echo "SQLite database created\n";
     }
 
     public function insert(Transaction $transaction): void

@@ -1,10 +1,6 @@
 <?php
 
-namespace App;
-
-use JsonSerializable;
-use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Output\ConsoleOutput;
+namespace App\Models;
 
 class User
 {
@@ -38,7 +34,5 @@ class User
     {
         return $this->password;
     }
-
-
 
 }

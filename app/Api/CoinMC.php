@@ -2,7 +2,7 @@
 
 namespace App\Api;
 
-use App\Currency;
+use App\Models\Currency;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 

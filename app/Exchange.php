@@ -2,21 +2,18 @@
 
 namespace App;
 
-use App\Api\CoinGecko;
 use App\Api\CoinMC;
 use App\Api\CryptoApi;
-use App\Database\Activity;
-use App\Database\Log;
 use App\Database\Transaction;
 use App\Database\TransactionDatabase;
+use App\Database\UserDatabase;
+use App\Database\WalletDatabase;
+use App\Models\Currency;
+use App\Models\User;
+use App\Models\Wallet;
 use Carbon\Carbon;
-use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Doctrine\DBAL\Exception;
-use App\Database\UserDatabase;
-use App\User;
-
 
 
 class Exchange
@@ -26,12 +23,14 @@ class Exchange
     private array $wallet;
     private User $user;
     private CryptoApi $exchangeApi;
-    private Database $database;
+    private WalletDatabase $database;
     private TransactionDatabase $transactionDatabase;
     private UserDatabase $userDatabase;
 
+    private array $latestUpdate;
 
-    public function __construct(string $baseDir, User $user,Database $database,UserDatabase $userDatabase,TransactionDatabase $transactionDatabase)
+
+    public function __construct(string $baseDir, User $user, UserDatabase $userDatabase, WalletDatabase $database, TransactionDatabase $transactionDatabase)
     {
         $this->database = $database;
         $this->crypto = $this->getCryptoList();
@@ -94,21 +93,22 @@ class Exchange
         $id = (int)readline("Enter the database ID to select crypto: ");
         $cryptoToSell = null;
 
-        foreach ($this->wallet as $key => $crypto) {
+        foreach ($this->wallet as  $crypto) {
             if ($crypto->getId() === $id) {
                 $cryptoToSell = $crypto;
-                $index = $key;
                 break;
             }
         }
 
         if ($cryptoToSell) {
-            $name = $cryptoToSell->getName();
             $valueNow = $cryptoToSell->getValueNow();
             $amount = $cryptoToSell->getAmount();
             $symbol= $cryptoToSell->getSymbol();
 
-            $this->user->setWallet($this->user->getWallet() + $valueNow);
+            $selectedUser = $this->userDatabase->selectUserByName($this->user->getName());
+
+            $data = ($selectedUser->getWallet()+$valueNow);
+            $this->userDatabase->updateUserWalletByName($this->user->getName(), $data);
 
 
             $this->database->deleteWallet($id);
@@ -118,7 +118,7 @@ class Exchange
                 'sell',
                 $symbol,
                 $amount,
-                Carbon::now(),
+                Carbon::now('Europe/Riga'),
             );
             $this->transactionDatabase->insert($transaction);
 
@@ -139,11 +139,16 @@ class Exchange
         $dateOfPurchase = Carbon::now('Europe/Riga');
         $value = $amount * $price;
         $valueNow = $amount * $price;
-        $this->user->setWallet($this->user->getWallet() - $purchasePrice);
+
+        $selectedUser = $this->userDatabase->selectUserByName($this->user->getName());
+
+        $data = ($selectedUser->getWallet()-$valueNow);
+        $this->userDatabase->updateUserWalletByName($this->user->getName(), $data);
+
 
         $crypto = new Wallet($name, $symbol, $amount, $price, $purchasePrice, $dateOfPurchase, $value, $valueNow);
         $this->addToWallet($crypto);
-        $this->user->saveToFile();
+
 
         $transaction = new Transaction(
             $this->user->getName(),

@@ -1,11 +1,11 @@
 <?php
-namespace App;
+namespace App\Database;
 
+use App\Models\Wallet;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Schema;
 
-class Database
+class WalletDatabase
 {
     private array $connectionParams;
     private $filePath;
@@ -47,8 +47,7 @@ class Database
         foreach ($sqls as $sql) {
             $dbalConnection->executeStatement($sql);
         }
-
-        echo "SQLite database created successfully at: {$this->filePath}\n";
+//        echo "SQLite database created successfully at: {$this->filePath}\n";
     }
     public function insertWallet(Wallet $wallet): int
     {
@@ -67,7 +66,6 @@ class Database
         $stmt->executeQuery();
 
         return (int)$this->dbalConnection->lastInsertId();
-//
     }
 
     public function getAll():array

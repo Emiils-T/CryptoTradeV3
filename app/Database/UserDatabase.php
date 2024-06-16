@@ -1,10 +1,10 @@
 <?php
+
 namespace App\Database;
 
-use Carbon\Carbon;
+use App\Models\User;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\Schema;
-use App\User;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
@@ -59,7 +59,6 @@ class UserDatabase
 
     public function getAllUsers(): array
     {
-
             $userData = $this->dbalConnection->fetchAllAssociative("SELECT * FROM usersData");
             $items = [];
             foreach ($userData as $value) {
@@ -71,24 +70,64 @@ class UserDatabase
                 $items[] = $userItem;
             }
             return $items;
-
     }
-    public function display():void
+    public function selectUserByName(string $name):?User
     {
+        $query = "SELECT * FROM usersData WHERE name = :name";
+        $stmt = $this->dbalConnection->prepare($query);
+        $stmt->bindValue(':name', $name);
+        $result = $stmt->executeQuery()->fetchAssociative();
+
+        if($result){
+            return new User(
+                $result['name'],
+                $result['wallet'],
+                $result['password']
+            );
+        }
+        return null;
+    }
+
+    public function updateUserWalletByName(string $name,int $value):void
+    {
+        $this->dbalConnection->update('usersData', ['wallet'=>$value] ,['name' => $name]);
+    }
+    public function displayAll():void
+    {
+        $this->checkEmpty();
         $rows = [];
         foreach ($this->getAllUsers() as $user) {
             $rows[] = [
                 $user->getName(),
-                $user->getWallet(),
-                $user->getPassword()
             ];
         }
         $output = new ConsoleOutput();
         $table = new Table($output);
-        $table->setHeaders(['Name', 'Wallet', 'Password']);
+        $table->setHeaders(['Name']);
         $table->setRows($rows);
         $table->render();
     }
+    public function checkEmpty():void
+    {
+        $check = $this->getAllUsers();
+        if(!$check){
+            echo "ERROR: User database empty\n";
+            exit;
+        }
+    }
 
-
+    public function displayUser(string $name):void
+    {
+        $user=$this->selectUserByName($name);
+        $rows = [];
+        $rows[]=[
+            $user->getName(),
+            $user->getWallet(),
+        ];
+        $output = new ConsoleOutput();
+        $table = new Table($output);
+        $table->setHeaders(['Name', 'Wallet']);
+        $table->setRows($rows);
+        $table->render();
+    }
 }

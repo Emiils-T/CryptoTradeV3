@@ -1,12 +1,12 @@
 <?php
 
 namespace App\Api;
-use App\Currency;
+use App\Models\Currency;
 
 interface CryptoApi
 {
     /**
-     * @return array<Currency>
+     * @return array<\App\Models\Currency>
      */
     public function getLatest(): array;
 
