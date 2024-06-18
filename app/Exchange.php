@@ -36,8 +36,8 @@ class Exchange
         $this->crypto = $this->getCryptoList();
         $this->baseDir = $baseDir;
         $this->user = $user;
-        $this->latestUpdate= $this->exchangeApi->getLatest();
-        $this->wallet=$this->getWallet();
+        $this->latestUpdate = $this->exchangeApi->getLatest();
+        $this->wallet = $this->getWallet();
 
         $this->transactionDatabase = $transactionDatabase;
         $this->userDatabase = $userDatabase;
@@ -85,15 +85,15 @@ class Exchange
     {
         $id = $this->database->insertWallet($coin);
         $coin->setId($id);
-        $this->wallet[]= $coin;
+        $this->wallet[] = $coin;
     }
 
-    public function sell():void//works
+    public function sell(): void//works
     {
         $id = (int)readline("Enter the database ID to select crypto: ");
         $cryptoToSell = null;
 
-        foreach ($this->wallet as  $crypto) {
+        foreach ($this->wallet as $crypto) {
             if ($crypto->getId() === $id) {
                 $cryptoToSell = $crypto;
                 break;
@@ -103,11 +103,11 @@ class Exchange
         if ($cryptoToSell) {
             $valueNow = $cryptoToSell->getValueNow();
             $amount = $cryptoToSell->getAmount();
-            $symbol= $cryptoToSell->getSymbol();
+            $symbol = $cryptoToSell->getSymbol();
 
             $selectedUser = $this->userDatabase->selectUserByName($this->user->getName());
 
-            $data = ($selectedUser->getWallet()+$valueNow);
+            $data = ($selectedUser->getWallet() + $valueNow);
             $this->userDatabase->updateUserWalletByName($this->user->getName(), $data);
 
 
@@ -127,14 +127,14 @@ class Exchange
         }
     }
 
-    public function buy():void//works
+    public function buy(): void//works
     {
-        $index = (int) readline("Enter index to select Crypto: ");
+        $index = (int)readline("Enter index to select Crypto: ");
         $selectedCrypto = $this->selectCrypto($index);
         $name = $selectedCrypto->getName();
         $symbol = $selectedCrypto->getSymbol();
         $price = $selectedCrypto->getPrice();
-        $purchasePrice = (int) readline("Enter how much to buy in USD: ");
+        $purchasePrice = (int)readline("Enter how much to buy in USD: ");
         $amount = $purchasePrice / $price; // Dollars worth
         $dateOfPurchase = Carbon::now('Europe/Riga');
         $value = $amount * $price;
@@ -142,7 +142,7 @@ class Exchange
 
         $selectedUser = $this->userDatabase->selectUserByName($this->user->getName());
 
-        $data = ($selectedUser->getWallet()-$valueNow);
+        $data = ($selectedUser->getWallet() - $valueNow);
         $this->userDatabase->updateUserWalletByName($this->user->getName(), $data);
 
 
@@ -178,7 +178,7 @@ class Exchange
         }
     }
 
-    public function searchAndDisplay(string $symbol):void//works
+    public function searchAndDisplay(string $symbol): void//works
     {
         $selectedCrypto = $this->search($symbol);
         foreach ($this->crypto as $key => $crypto) {
@@ -244,11 +244,11 @@ class Exchange
                 $crypto->getSymbol(),
                 $crypto->getPrice(),
                 $crypto->getPurchasePrice(),
-                number_format($crypto->getAmount(),5),
+                number_format($crypto->getAmount(), 5),
                 $crypto->getDateOfPurchase(),
                 $crypto->getValue(),
-                number_format($crypto->getValueNow(),5),
-                number_format($crypto->getProfit(),5)
+                number_format($crypto->getValueNow(), 5),
+                number_format($crypto->getProfit(), 5)
             ];
         }
         $output = new ConsoleOutput();

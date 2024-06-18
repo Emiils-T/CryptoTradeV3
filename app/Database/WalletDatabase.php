@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Database;
 
 use App\Models\Wallet;
@@ -22,7 +23,7 @@ class WalletDatabase
         $this->dbalConnection = DriverManager::getConnection($this->connectionParams);
     }
 
-    public function createDatabase():void
+    public function createDatabase(): void
     {
         $dbalConnection = DriverManager::getConnection($this->connectionParams);
 
@@ -47,8 +48,8 @@ class WalletDatabase
         foreach ($sqls as $sql) {
             $dbalConnection->executeStatement($sql);
         }
-//        echo "SQLite database created successfully at: {$this->filePath}\n";
     }
+
     public function insertWallet(Wallet $wallet): int
     {
         $query = "INSERT INTO cryptoWallet (name, symbol, amount, price, purchasePrice, dateOfPurchase, value, valueNow, profit)
@@ -68,7 +69,7 @@ class WalletDatabase
         return (int)$this->dbalConnection->lastInsertId();
     }
 
-    public function getAll():array
+    public function getAll(): array
     {
         return $this->dbalConnection->fetchAllAssociative('SELECT * FROM cryptoWallet');
     }
@@ -84,8 +85,8 @@ class WalletDatabase
         $this->dbalConnection->update('cryptoWallet', $data, ['id' => $id]);
     }
 
-    public function insert(array $data):void
+    public function insert(array $data): void
     {
-        $this->dbalConnection->insert("cryptoWallet",$data);
+        $this->dbalConnection->insert("cryptoWallet", $data);
     }
 }

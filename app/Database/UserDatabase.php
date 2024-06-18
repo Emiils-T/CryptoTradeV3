@@ -32,12 +32,12 @@ class UserDatabase
         $userTable = $schema->createTable('usersData');
         $userTable->addColumn('id', 'integer');
         $userTable->addColumn('name', 'string');
-        $userTable->addColumn('wallet','float');
+        $userTable->addColumn('wallet', 'float');
         $userTable->addColumn('password', 'string');
         $userTable->setPrimaryKey(['id']);
 
         $platform = $dbalConnection->getDatabasePlatform();
-        $sqls= $schema->toSql($platform);
+        $sqls = $schema->toSql($platform);
 
         foreach ($sqls as $sql) {
             $dbalConnection->executeStatement($sql);
@@ -48,37 +48,38 @@ class UserDatabase
     public function insert(User $user): void
     {
 
-            $query = "INSERT INTO usersData (name, wallet, password) VALUES (:name, :wallet, :password)";
-            $stmt = $this->dbalConnection->prepare($query);
-            $stmt->bindValue(':name', $user->getName());
-            $stmt->bindValue(':wallet', $user->getWallet());
-            $stmt->bindValue(':password', $user->getPassword());
-            $stmt->executeQuery();
+        $query = "INSERT INTO usersData (name, wallet, password) VALUES (:name, :wallet, :password)";
+        $stmt = $this->dbalConnection->prepare($query);
+        $stmt->bindValue(':name', $user->getName());
+        $stmt->bindValue(':wallet', $user->getWallet());
+        $stmt->bindValue(':password', $user->getPassword());
+        $stmt->executeQuery();
 
     }
 
     public function getAllUsers(): array
     {
-            $userData = $this->dbalConnection->fetchAllAssociative("SELECT * FROM usersData");
-            $items = [];
-            foreach ($userData as $value) {
-                $userItem = new User(
-                    $value['name'],
-                    $value['wallet'],
-                    $value['password']
-                );
-                $items[] = $userItem;
-            }
-            return $items;
+        $userData = $this->dbalConnection->fetchAllAssociative("SELECT * FROM usersData");
+        $items = [];
+        foreach ($userData as $value) {
+            $userItem = new User(
+                $value['name'],
+                $value['wallet'],
+                $value['password']
+            );
+            $items[] = $userItem;
+        }
+        return $items;
     }
-    public function selectUserByName(string $name):?User
+
+    public function selectUserByName(string $name): ?User
     {
         $query = "SELECT * FROM usersData WHERE name = :name";
         $stmt = $this->dbalConnection->prepare($query);
         $stmt->bindValue(':name', $name);
         $result = $stmt->executeQuery()->fetchAssociative();
 
-        if($result){
+        if ($result) {
             return new User(
                 $result['name'],
                 $result['wallet'],
@@ -88,11 +89,12 @@ class UserDatabase
         return null;
     }
 
-    public function updateUserWalletByName(string $name,int $value):void
+    public function updateUserWalletByName(string $name, int $value): void
     {
-        $this->dbalConnection->update('usersData', ['wallet'=>$value] ,['name' => $name]);
+        $this->dbalConnection->update('usersData', ['wallet' => $value], ['name' => $name]);
     }
-    public function displayAll():void
+
+    public function displayAll(): void
     {
         $this->checkEmpty();
         $rows = [];
@@ -107,20 +109,21 @@ class UserDatabase
         $table->setRows($rows);
         $table->render();
     }
-    public function checkEmpty():void
+
+    public function checkEmpty(): void
     {
         $check = $this->getAllUsers();
-        if(!$check){
+        if (!$check) {
             echo "ERROR: User database empty\n";
             exit;
         }
     }
 
-    public function displayUser(string $name):void
+    public function displayUser(string $name): void
     {
-        $user=$this->selectUserByName($name);
+        $user = $this->selectUserByName($name);
         $rows = [];
-        $rows[]=[
+        $rows[] = [
             $user->getName(),
             $user->getWallet(),
         ];

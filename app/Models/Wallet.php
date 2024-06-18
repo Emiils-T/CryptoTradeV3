@@ -21,16 +21,16 @@ class Wallet implements JsonSerializable
 
 
     public function __construct(
-                                string $name,
-                                string $symbol,
-                                float  $amount,
-                                float  $price,
-                                int    $purchasePrice,
-                                Carbon $dateOfPurchase,
-                                float  $value,
-                                float  $valueNow,
-                                ?float $profit = 0,
-                                ?int $id=null
+        string $name,
+        string $symbol,
+        float  $amount,
+        float  $price,
+        int    $purchasePrice,
+        Carbon $dateOfPurchase,
+        float  $value,
+        float  $valueNow,
+        ?float $profit = 0,
+        ?int   $id = null
     )
     {
 
@@ -50,10 +50,12 @@ class Wallet implements JsonSerializable
     {
         return $this->id;
     }
+
     public function setId(int $id): void
     {
         $this->id = $id;
     }
+
     public function getName(): string
     {
         return $this->name;

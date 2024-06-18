@@ -2,37 +2,34 @@
 
 require_once './vendor/autoload.php';
 
-use App\Database\TransactionDatabase;
 use App\Database\UserDatabase;
-use App\Database\WalletDatabase;
 use App\Exchange;
-use App\Models\User;
 use App\Ask;
 
 
 $baseDir = __DIR__;
 $userLocation = __DIR__ . '/Users/UserDatabase.sqlite';
-if(!file_exists($userLocation)){
+if (!file_exists($userLocation)) {
     $userDatabase = new UserDatabase($userLocation);
     $userDatabase->create();
-}else{
+} else {
     $userDatabase = new UserDatabase($userLocation);
 }
 
-$selectedUser=null;
-$database=null;
-$transactions=null;
+$selectedUser = null;
+$database = null;
+$transactions = null;
 echo "\n1. Create new User\n2. Log into existing User\n";
-$choice = (int) readline("Enter choice: ");
+$choice = (int)readline("Enter choice: ");
 
-switch($choice){
+switch ($choice) {
     case 1:
-        $selectedUser = Ask::createUser($userDatabase,$baseDir);
-        [$database,$transactions]=Ask::setupWalletAndTransactions($selectedUser->getName(),$baseDir);
+        $selectedUser = Ask::createUser($userDatabase, $baseDir);
+        [$database, $transactions] = Ask::setupWalletAndTransactions($selectedUser->getName(), $baseDir);
         break;
     case 2:
         $selectedUser = Ask::login($userDatabase);
-        [$database,$transactions]=Ask::setupWalletAndTransactions($selectedUser->getName(),$baseDir);
+        [$database, $transactions] = Ask::setupWalletAndTransactions($selectedUser->getName(), $baseDir);
         break;
     default:
         echo "Invalid input\n";
@@ -50,27 +47,27 @@ while (true) {
 
     switch ($choice) {
         case 1:
-            $exchange = new Exchange($baseDir, $selectedUser,$userDatabase, $database,$transactions);
+            $exchange = new Exchange($baseDir, $selectedUser, $userDatabase, $database, $transactions);
             $exchange->displayCrypto();
             break;
         case 2:
             $symbol = strtoupper((string)readline("Enter symbol: "));
-            $exchange = new Exchange($baseDir, $selectedUser,$userDatabase,$database,$transactions);
+            $exchange = new Exchange($baseDir, $selectedUser, $userDatabase, $database, $transactions);
             $exchange->searchAndDisplay($symbol);
 
             break;
         case 3:
-            $exchange = new Exchange($baseDir, $selectedUser,$userDatabase,$database,$transactions);
+            $exchange = new Exchange($baseDir, $selectedUser, $userDatabase, $database, $transactions);
             $exchange->displayCrypto();
             $exchange->buy();
             break;
         case 4:
-            $exchange = new Exchange($baseDir, $selectedUser,$userDatabase, $database,$transactions);
+            $exchange = new Exchange($baseDir, $selectedUser, $userDatabase, $database, $transactions);
             $exchange->displayWallet();
             $exchange->sell();
             break;
         case 5:
-            $exchange = new Exchange($baseDir, $selectedUser,$userDatabase, $database,$transactions);
+            $exchange = new Exchange($baseDir, $selectedUser, $userDatabase, $database, $transactions);
             $exchange->displayWallet();
 
             break;

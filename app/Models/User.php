@@ -26,13 +26,8 @@ class User
         return $this->wallet;
     }
 
-    public function setWallet(float $wallet): void
-    {
-        $this->wallet = $wallet;
-    }
     public function getPassword(): string
     {
         return $this->password;
     }
-
 }

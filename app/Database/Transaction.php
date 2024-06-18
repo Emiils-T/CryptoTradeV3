@@ -20,7 +20,7 @@ class Transaction implements JsonSerializable
         string $user,
         string $type,
         string $symbol,
-        float $amount,
+        float  $amount,
         Carbon $date)
     {
         $this->user = $user;

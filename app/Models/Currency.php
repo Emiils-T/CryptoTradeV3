@@ -8,12 +8,13 @@ class Currency
     private string $symbol;
     private float $price;
 
-    public function __construct(string $name , string $symbol , float $price)
+    public function __construct(string $name, string $symbol, float $price)
     {
         $this->name = $name;
         $this->symbol = $symbol;
         $this->price = $price;
     }
+
     public function getName(): string
     {
         return $this->name;
@@ -23,6 +24,7 @@ class Currency
     {
         return $this->symbol;
     }
+
     public function getPrice(): float
     {
         return $this->price;

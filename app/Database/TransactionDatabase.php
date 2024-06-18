@@ -29,7 +29,7 @@ class TransactionDatabase
         $this->dbalConnection = DriverManager::getConnection($this->connectionParams);
     }
 
-    public function create():void
+    public function create(): void
     {
         $dbalConnection = DriverManager::getConnection($this->connectionParams);
 
@@ -66,26 +66,27 @@ class TransactionDatabase
         $stmt->executeQuery();
 
     }
+
     public function getAll(): array
     {
 
-            $transactionData = $this->dbalConnection->fetchAllAssociative("SELECT * FROM transactions");
-            $items = [];
-            foreach ($transactionData as $transaction) {
-                $transactionItem = new Transaction(
-                    $transaction['user'],
-                    $transaction['type'],
-                    $transaction['symbol'],
-                    $transaction['amount'],
-                    Carbon::parse($transaction['date'])
-                );
-                $items[] = $transactionItem;
-            }
-            return $items;
+        $transactionData = $this->dbalConnection->fetchAllAssociative("SELECT * FROM transactions");
+        $items = [];
+        foreach ($transactionData as $transaction) {
+            $transactionItem = new Transaction(
+                $transaction['user'],
+                $transaction['type'],
+                $transaction['symbol'],
+                $transaction['amount'],
+                Carbon::parse($transaction['date'])
+            );
+            $items[] = $transactionItem;
+        }
+        return $items;
 
     }
 
-    public function display():void
+    public function display(): void
     {
         $rows = [];
         foreach ($this->getAll() as $transaction) {
