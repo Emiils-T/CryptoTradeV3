@@ -1,0 +1,46 @@
+{% include 'menu.html.twig' %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Currency Data List</title>
+    <style>
+        .data-item {
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+<h1>Currency Data List</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Symbol</th>
+        <th>Price</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in items %}
+        <tr>
+            <td>{{ item.getName() }}</td>
+            <td>{{ item.getSymbol() }}</td>
+            <td>{{ item.getPrice()|number_format(8, '.', '') }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

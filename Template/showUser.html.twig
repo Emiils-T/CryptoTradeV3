@@ -1,0 +1,118 @@
+{#{% include 'menu.html.twig' %}#}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Wallet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .menu {
+            background-color: #ffffff;
+            padding: 10px 0;
+        }
+
+        .menu h4 {
+            margin: 0;
+            text-align: center;
+        }
+
+        .menu a {
+            color: #353232;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: inline-block;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .menu a:hover {
+            background-color: #ffffff;
+            color: #100f0f;
+        }
+
+        .menu a.active {
+            background-color: #4CAF50;
+            color: #100f0f;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            position: absolute;
+            top: 1px;
+            right: 1px;
+        }
+        .user-info {
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        .user-info .info-item {
+            margin-bottom: 5px;
+        }
+
+        .user-info .info-item label {
+            font-weight: bold;
+        }
+
+        .user-info .name, .user-info .wallet {
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<div class="top-right">
+    <div class="menu">
+        <h4>
+            <a class="menu" href="/home">Home</a>
+            <a class="menu" href="/currencies">Top Cryptos</a>
+            <a class="menu" href="/wallets">Wallet</a>
+            <a class="menu" href="/log">History</a>
+            <a class="menu" href="/buy">Buy</a>
+            <a class="menu" href="/sell">Sell</a>
+        </h4>
+    </div>
+    <div class="container">
+        {% for item in items %}
+            <div class="user-info">
+                <div class="info-item">
+                    <label>Username:</label>
+                    <span class="name">{{ item.getName() }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Wallet:</label>
+                    <span class="wallet">{{ item.getWallet() }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>

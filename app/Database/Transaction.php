@@ -60,7 +60,10 @@ class Transaction implements JsonSerializable
     function jsonSerialize(): array
     {
         return [
-
+            'user' => $this->user,
+            'type' => $this->type,
+            'symbol' => $this->symbol,
+            'amount' => $this->amount,
             'date' => $this->date,
         ];
     }

@@ -88,9 +88,8 @@ class Exchange
         $this->wallet[] = $coin;
     }
 
-    public function sell(): void//works
+    public function sell(int $id): void
     {
-        $id = (int)readline("Enter the database ID to select crypto: ");
         $cryptoToSell = null;
 
         foreach ($this->wallet as $crypto) {
@@ -106,57 +105,37 @@ class Exchange
             $symbol = $cryptoToSell->getSymbol();
 
             $selectedUser = $this->userDatabase->selectUserByName($this->user->getName());
-
             $data = ($selectedUser->getWallet() + $valueNow);
             $this->userDatabase->updateUserWalletByName($this->user->getName(), $data);
 
-
             $this->database->deleteWallet($id);
 
-            $transaction = new Transaction(
-                $this->user->getName(),
-                'sell',
-                $symbol,
-                $amount,
-                Carbon::now('Europe/Riga'),
-            );
+            $transaction = new Transaction($this->user->getName(), 'sell', $symbol, $amount, Carbon::now('Europe/Riga'));
             $this->transactionDatabase->insert($transaction);
-
         } else {
-            echo "Invalid ID provided.\n";
+            throw new \Exception("Invalid ID provided.\n");
         }
     }
 
-    public function buy(): void//works
+    public function buy(string $symbol, int $purchasePrice): void
     {
-        $index = (int)readline("Enter index to select Crypto: ");
-        $selectedCrypto = $this->selectCrypto($index);
+        $selectedCrypto = $this->search($symbol);
         $name = $selectedCrypto->getName();
         $symbol = $selectedCrypto->getSymbol();
         $price = $selectedCrypto->getPrice();
-        $purchasePrice = (int)readline("Enter how much to buy in USD: ");
-        $amount = $purchasePrice / $price; // Dollars worth
+        $amount = $purchasePrice / $price;
         $dateOfPurchase = Carbon::now('Europe/Riga');
         $value = $amount * $price;
         $valueNow = $amount * $price;
 
         $selectedUser = $this->userDatabase->selectUserByName($this->user->getName());
-
         $data = ($selectedUser->getWallet() - $valueNow);
         $this->userDatabase->updateUserWalletByName($this->user->getName(), $data);
-
 
         $crypto = new Wallet($name, $symbol, $amount, $price, $purchasePrice, $dateOfPurchase, $value, $valueNow);
         $this->addToWallet($crypto);
 
-
-        $transaction = new Transaction(
-            $this->user->getName(),
-            'buy',
-            $symbol,
-            $amount,
-            $dateOfPurchase
-        );
+        $transaction = new Transaction($this->user->getName(), 'buy', $symbol, $amount, $dateOfPurchase);
         $this->transactionDatabase->insert($transaction);
     }
 
@@ -178,93 +157,19 @@ class Exchange
         }
     }
 
-    public function searchAndDisplay(string $symbol): void//works
-    {
-        $selectedCrypto = $this->search($symbol);
-        foreach ($this->crypto as $key => $crypto) {
-
-            if ($crypto->getSymbol() === $symbol) {
-                $selectedCrypto = $this->crypto[$key];
-            }
-        }
-        $rows = [];
-        $rows[] = [
-            $selectedCrypto->getName(),
-            $selectedCrypto->getSymbol(),
-            $selectedCrypto->getPrice()
-        ];
-
-        $output = new ConsoleOutput();
-        $table = new Table($output);
-        $table
-            ->setHeaders([
-                "Name",
-                "Symbol",
-                "Price"
-            ])
-            ->setRows($rows);
-        $table->render();
-    }
 
     public function search(string $symbol): ?Currency
     {
-        foreach ($this->crypto as $crypto) {
-            if ($crypto->getSymbol() === $symbol) {
-                return $crypto;
+        try {
+            foreach ($this->crypto as $crypto) {
+                if ($crypto->getSymbol() === $symbol) {
+                    return $crypto;
+                }
             }
+        } catch (\Exception $exception) {
+            echo "An error occurred: " . $exception->getMessage() . "\n";
         }
+        throw new \Exception("Could not find $symbol.");
 
-        echo "Error: couldn't find crypto $symbol\n";
-        return null;
-    }
-
-    public function displayCrypto(): void
-    {
-        $rows = [];
-
-        foreach ($this->crypto as $index => $crypto) {
-            $rows[] = [$index, $crypto->getName(), $crypto->getSymbol(), $crypto->getPrice()];
-        }
-
-        $output = new ConsoleOutput();
-        $table = new Table($output);
-        $table->setHeaders(["Index", "Name", "Symbol", "Price"])->setRows($rows);
-        $table->render();
-    }
-
-    public function displayWallet(): void
-    {
-        $this->updateWallet();
-        $wallet = $this->getWallet();
-        $rows = [];
-        foreach ($wallet as $crypto) {
-            $rows[] = [
-                $crypto->getId(),
-                $crypto->getName(),
-                $crypto->getSymbol(),
-                $crypto->getPrice(),
-                $crypto->getPurchasePrice(),
-                number_format($crypto->getAmount(), 5),
-                $crypto->getDateOfPurchase(),
-                $crypto->getValue(),
-                number_format($crypto->getValueNow(), 5),
-                number_format($crypto->getProfit(), 5)
-            ];
-        }
-        $output = new ConsoleOutput();
-        $table = new Table($output);
-        $table->setHeaders([
-            "ID",
-            "Name",
-            "Symbol",
-            "Price",
-            "Purchase Price",
-            "Amount",
-            "DateOfPurchase",
-            "Value",
-            "Value Now",
-            "Profit/Loss"]);
-        $table->setRows($rows);
-        $table->render();
     }
 }

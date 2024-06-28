@@ -2,9 +2,12 @@
 
 require_once './vendor/autoload.php';
 
+use App\Database\TransactionDatabase;
 use App\Database\UserDatabase;
-use App\Exchange;
-use App\Ask;
+use App\Database\WalletDatabase;
+use App\Controllers\CryptoController;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 
 $baseDir = __DIR__;
@@ -16,68 +19,73 @@ if (!file_exists($userLocation)) {
     $userDatabase = new UserDatabase($userLocation);
 }
 
-$selectedUser = null;
+$userName = "Emils";
 $database = null;
 $transactions = null;
-echo "\n1. Create new User\n2. Log into existing User\n";
-$choice = (int)readline("Enter choice: ");
 
-switch ($choice) {
-    case 1:
-        $selectedUser = Ask::createUser($userDatabase, $baseDir);
-        [$database, $transactions] = Ask::setupWalletAndTransactions($selectedUser->getName(), $baseDir);
-        break;
-    case 2:
-        $selectedUser = Ask::login($userDatabase);
-        [$database, $transactions] = Ask::setupWalletAndTransactions($selectedUser->getName(), $baseDir);
-        break;
-    default:
-        echo "Invalid input\n";
-}
+$sqliteFile = $baseDir . '/Wallet/' . $userName . '_Wallet.sqlite';
+$database = new WalletDatabase($sqliteFile);
+
+$transactionLocation = $baseDir . '/Transactions/' . $userName . '_Transactions.sqlite';
+$transactions = new TransactionDatabase($transactionLocation);
+
+$selectedUser = $userDatabase->selectUserByName($userName);
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
+$loader = new FilesystemLoader(__DIR__ . '/Template');
+$twig = new Environment($loader, [
+    'cache' => false,
+]);
 
-while (true) {
-    $userDatabase->displayUser($selectedUser->getName());
-    echo "1. List top crypto\n2. Search for crypto by Symbol\n3. Buy crypto\n4. Sell crypto\n";
-    echo "5. Display Wallet\n6. Transaction List\n7. Exit\n";
-    $choice = (int)readline("Enter index to select choice: ");
+$dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
+    $r->addRoute('GET', '/', [CryptoController::class, "showUser"]);
+    $r->addRoute('GET', '/currencies', [CryptoController::class, "index"]);
+    $r->addRoute('GET', '/search', [CryptoController::class, "searchForm"]);
+    $r->addRoute('POST', '/search', [CryptoController::class, "search"]);
+    $r->addRoute('GET', '/log', [CryptoController::class, "transactions"]);
+    $r->addRoute('GET', '/buy', [CryptoController::class, "buyForm"]);
+    $r->addRoute('POST', '/buy', [CryptoController::class, "buy"]);
+    $r->addRoute('GET', '/wallets', [CryptoController::class, "showWallet"]);
+    $r->addRoute('GET', '/sell', [CryptoController::class, "sellForm"]);
+    $r->addRoute('POST', '/sell', [CryptoController::class, "sell"]);
 
-    switch ($choice) {
-        case 1:
-            $exchange = new Exchange($baseDir, $selectedUser, $userDatabase, $database, $transactions);
-            $exchange->displayCrypto();
-            break;
-        case 2:
-            $symbol = strtoupper((string)readline("Enter symbol: "));
-            $exchange = new Exchange($baseDir, $selectedUser, $userDatabase, $database, $transactions);
-            $exchange->searchAndDisplay($symbol);
+});
 
-            break;
-        case 3:
-            $exchange = new Exchange($baseDir, $selectedUser, $userDatabase, $database, $transactions);
-            $exchange->displayCrypto();
-            $exchange->buy();
-            break;
-        case 4:
-            $exchange = new Exchange($baseDir, $selectedUser, $userDatabase, $database, $transactions);
-            $exchange->displayWallet();
-            $exchange->sell();
-            break;
-        case 5:
-            $exchange = new Exchange($baseDir, $selectedUser, $userDatabase, $database, $transactions);
-            $exchange->displayWallet();
+// Fetch method and URI from somewhere
+$httpMethod = $_SERVER['REQUEST_METHOD'];
+$uri = $_SERVER['REQUEST_URI'];
 
-            break;
-        case 6:
-            $transactions->display();
-            break;
-        case 7:
-            exit;
-        default:
-            echo "Error: Wrong Input";
-            break;
-    }
+// Strip query string (?foo=bar) and decode URI
+if (false !== $pos = strpos($uri, '?')) {
+    $uri = substr($uri, 0, $pos);
+}
+$uri = rawurldecode($uri);
+
+$routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+switch ($routeInfo[0]) {
+    case FastRoute\Dispatcher::NOT_FOUND:
+        // ... 404 Not Found
+        break;
+    case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+        $allowedMethods = $routeInfo[1];
+        // ... 405 Method Not Allowed
+        break;
+    case FastRoute\Dispatcher::FOUND:
+        $handler = $routeInfo[1];
+        $vars = $routeInfo[2];
+
+        [$controller, $method] = $handler;
+        $controllerInstance = new $controller($userDatabase, $database, $transactions, $baseDir);
+
+        if ($method == "sellForm") {
+            $data = $controllerInstance->{"showWallet"}(...array_values($vars));
+            echo $twig->render('showWallet.html.twig', ['items' => $data]);
+        }
+
+        $data = $controllerInstance->{$method}(...array_values($vars));
+        echo $twig->render($method . '.html.twig', ['items' => $data]);
+
+        break;
 }

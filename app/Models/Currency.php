@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-class Currency
+use JsonSerializable;
+
+class Currency implements JsonSerializable
 {
     private string $name;
     private string $symbol;
@@ -28,5 +30,14 @@ class Currency
     public function getPrice(): float
     {
         return $this->price;
+    }
+
+    public function jsonSerialize():array
+    {
+        return [
+            'name' => $this->name,
+            'symbol' => $this->symbol,
+            'price' => $this->price
+        ];
     }
 }

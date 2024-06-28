@@ -1,0 +1,78 @@
+{% include 'menu.html.twig' %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transaction List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f4f4f4;
+            color: #333;
+            text-transform: uppercase;
+        }
+        td {
+            background-color: #fff;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tbody tr:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+<h1>Transaction List</h1>
+<table>
+    <thead>
+    <tr>
+        <th>User</th>
+        <th>Type</th>
+        <th>Symbol</th>
+        <th>Amount</th>
+        <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in items %}
+        <tr>
+            <td>{{ item.getUser() }}</td>
+            <td>{{ item.getType() }}</td>
+            <td>{{ item.getSymbol() }}</td>
+            <td>{{ item.getAmount() }}</td>
+            <td>{{ item.getDate() }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>
